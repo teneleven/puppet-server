@@ -1,0 +1,9 @@
+install: 
+  - 'bundle install'
+  - 'gem install librarian-puppet'
+  - 'librarian-puppet install --path=spec/fixtures/modules'
+
+script: 'rake spec'
+
+notifications:
+  email: false
