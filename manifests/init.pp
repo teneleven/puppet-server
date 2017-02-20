@@ -65,10 +65,13 @@ class server (
 
   if ($classes and is_array($classes)) {
     $classes.each |$class| {
-      include $class
+      contain $class
     }
   } elsif ($classes and is_hash($classes)) {
     create_resources('class', $classes)
+    $classes.each |$className,$params| {
+      contain $className
+    }
   }
 
   if ($resources and is_hash($resources)) {
