@@ -35,12 +35,35 @@ class server (
   }
 
   if ($groups and is_array($groups)) {
-    group { $groups: }
+    group { $groups:
+      ensure => present
+    }
   } elsif ($groups and is_hash($groups)) {
     create_resources('group', $groups)
   }
 
   if ($users and is_hash($users)) {
+    # setup relationships from Groups -> Users
+    if (!empty($groups)) {
+      $groups.each |$group_key,$group_val| {
+        $users.each |$user_key,$user_val| {
+          if (is_hash($group_val)) {
+            $group_name = $group_key
+          } else {
+            $group_name = $group_val
+          }
+
+          if (is_hash($user_val)) {
+            $user_name = $group_key
+          } else {
+            $user_name = $group_val
+          }
+
+          Group[$group_name] -> User[$user_name]
+        }
+      }
+    }
+
     create_resources('user', $users)
   }
 
