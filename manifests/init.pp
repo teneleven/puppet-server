@@ -67,9 +67,25 @@ class server (
     create_resources('user', $users)
   }
 
-  # TODO setup relationship(s) between exec and $packages
   if ($exec and is_array($exec)) {
-    $exec.each |$exe| {
+    $exec.each |$key, $exe| {
+      # setup relationship between previous exec
+      if (is_integer($key) and $key - 1 >= 0) {
+        $prev_exec = $exec[$key - 1]
+        Exec["server_exec_${prev_exec}"] -> Exec["server_exec_${exe}"]
+      }
+
+      # ensure packages installed before exec
+      if (!empty($packages)) {
+        $packages.each |$package_key,$package_val| {
+          if (is_hash($package_val)) {
+            Package[$package_key] -> Exec["server_exec_${exe}"]
+          } else {
+            Package[$package_val] -> Exec["server_exec_${exe}"]
+          }
+        }
+      }
+
       create_resources('exec', { "server_exec_${exe}" => merge(
         $exec_defaults,
         { command => $exe }
